@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Μέτρα Μελαμίνης</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-180.png">
+<meta name="theme-color" content="#24201c">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<style>
+:root{--bg:#f6f5f2;--card:#fff;--ink:#1f2328;--mut:#6b7280;--line:#e3e1dc;--acc:#b4531a;--acc2:#fbe9dd;--ok:#2f7d4f;--warn:#a16207;--warnbg:#fef6e0;--thin:#2563eb;--thick:#b4531a}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink);font-size:15px}
+header{background:#24201c;color:#fff;padding:12px 14px;position:sticky;top:0;z-index:5}
+header h1{margin:0;font-size:17px;font-weight:650;letter-spacing:.2px}
+header small{color:#c9c2b8;font-size:12px}
+nav{display:flex;gap:4px;overflow-x:auto;background:#fff;border-bottom:1px solid var(--line);position:sticky;top:52px;z-index:4;padding:6px 8px}
+nav button{flex:0 0 auto;border:0;background:transparent;padding:8px 12px;border-radius:8px;font-size:14px;color:var(--mut);font-weight:550}
+nav button.on{background:var(--acc2);color:var(--acc)}
+main{max-width:980px;margin:0 auto;padding:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:12px}
+.card h2{font-size:15px;margin:0 0 10px;display:flex;align-items:center;gap:8px}
+.card h3{font-size:14px;margin:12px 0 6px;color:var(--mut);font-weight:600}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px 10px}
+label{display:flex;flex-direction:column;font-size:12px;color:var(--mut);gap:3px}
+input,select{font-size:15px;padding:8px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);width:100%}
+input[type=checkbox]{width:auto}
+.chk{flex-direction:row;align-items:center;gap:6px;font-size:14px;color:var(--ink)}
+.btn{border:1px solid var(--line);background:#fff;border-radius:8px;padding:8px 12px;font-size:14px;font-weight:550;color:var(--ink);cursor:pointer}
+.btn.pri{background:var(--acc);border-color:var(--acc);color:#fff}
+.btn.del{color:#b91c1c}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.mod{border-left:4px solid var(--acc)}
+.modhead{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px}
+.modhead input{font-weight:650}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{padding:7px 6px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
+th{font-size:12px;color:var(--mut);font-weight:600}
+td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
+.fin{display:block;font-size:11px;color:var(--mut)}
+.note{font-size:12.5px;color:var(--mut);line-height:1.45}
+.warn{background:var(--warnbg);color:var(--warn);border-radius:8px;padding:8px 10px;font-size:13px;margin:6px 0}
+.pill{display:inline-block;font-size:11px;padding:2px 7px;border-radius:99px;background:#eef2ff;color:#3730a3;font-weight:600}
+.pill.no{background:var(--warnbg);color:var(--warn)}
+.pill.yes{background:#e8f5ec;color:var(--ok)}
+.edge svg{cursor:pointer;display:block}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--mut);margin:6px 0}
+.legend i{display:inline-block;width:18px;height:4px;vertical-align:middle;margin-right:4px;border-radius:2px}
+.kpi{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.kpi div{background:var(--bg);border-radius:10px;padding:10px}
+.kpi b{display:block;font-size:20px}
+.kpi span{font-size:12px;color:var(--mut)}
+.sheet{margin:8px 0 16px}
+.sheet svg{width:100%;height:auto;background:#fffdf9;border:1px solid var(--line);border-radius:6px}
+.hide{display:none}
+.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#24201c;color:#fff;padding:10px 16px;border-radius:10px;font-size:14px;opacity:0;transition:.25s;pointer-events:none}
+.toast.on{opacity:1}
+a{color:var(--acc)}
+textarea{width:100%;min-height:160px;font-family:ui-monospace,monospace;font-size:12px;border:1px solid var(--line);border-radius:8px;padding:8px}
+.door{border:1px solid var(--line);border-radius:10px;padding:10px;margin:8px 0;display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap}
+.door svg{flex:0 0 auto}
+.door .txt{flex:1;min-width:180px;font-size:13.5px;line-height:1.5}
+</style>
+</head>
+<body>
+<header><h1>Μέτρα Μελαμίνης</h1><small>Ντουλάπες · Κουζίνες · Λίστα κοπής · PVC · Μεντεσέδες</small></header>
+<nav id="tabs">
+  <button data-t="project" class="on">Έργο</button>
+  <button data-t="cut">Λίστα κοπής</button>
+  <button data-t="drill">Τρυπήματα</button>
+  <button data-t="sheets">Πλάκες</button>
+  <button data-t="settings">Ρυθμίσεις</button>
+  <button data-t="info">Πληροφορίες</button>
+</nav>
+<main>
+<section id="t-project"></section>
+<section id="t-cut" class="hide"></section>
+<section id="t-drill" class="hide"></section>
+<section id="t-sheets" class="hide"></section>
+<section id="t-settings" class="hide"></section>
+<section id="t-info" class="hide"></section>
+</main>
+<div class="toast" id="toast"></div>
+
+<script id="core">
+/* ===== ΔΕΔΟΜΕΝΑ ΑΓΟΡΑΣ (από έρευνα Νοε 2026) ===== */
+const SUPPLIERS = [
+  {id:'egger',   name:'Egger (Eurodekor)', sizes:[[2800,2070]], thks:[8,10,12,16,18,19,22,25,28,32,38], ok:true,  note:'Στάνταρ 2800×2070×18. Άλλα πάχη 8–38 κατόπιν παραγγελίας.'},
+  {id:'kronospan',name:'Kronospan',        sizes:[[2800,2070],[2800,2100]], thks:[8,10,12,16,18,19,22,25,28,38], ok:true, note:'Μελαμίνη 2800×2070 (18mm σε στοκ). Λακαριστά MDF 2800×2100.'},
+  {id:'alfawood',name:'Alfa Wood',         sizes:[[2800,2070],[3660,1830],[3660,1850]], thks:[6,8,10,12,16,18,19,22,25,30,38], ok:true, note:'Μοριοσανίδα μελαμίνης 3660×1830 & 2800×2070. MDF μελαμίνη 2800×2070 & 3660×1850.'},
+  {id:'akritas', name:'Ακρίτας',           sizes:[[3660,1830],[3660,2070],[3660,2200]], thks:[8,16,18,25,6,10,12,22,28,30,38], ok:true, note:'Βασικό 3660×1830, και πλάτη 2070 / 2200. Στοκ: 8,16,18,25mm. Κατόπιν παραγγελίας: 6,10,12,22,28,30,38.'},
+  {id:'eltop',   name:'Eltop',             sizes:[[2800,2070]], thks:[8,16,18,25], ok:false, note:'Διανομέας (κυρίως HPL). Δεν δημοσιεύει διαστάσεις — επιβεβαίωσε το φύλλο που σου δίνουν.'},
+  {id:'praxitelis',name:'Πραξιτέλης',      sizes:[[2800,2070]], thks:[8,16,18,25], ok:false, note:'Δεν βρέθηκαν δημοσιευμένες διαστάσεις — επιβεβαίωσε με τον προμηθευτή.'},
+  {id:'custom',  name:'Άλλο / Δικό μου μέγεθος', sizes:[], thks:[], ok:false, note:'Γράψε το μέγεθος φύλλου που αγοράζεις.'}
+];
+const RUNNERS = [200,250,300,350,400,450,500,550,600,650,700];
+function bTsafe(s){ return +s.drBotThk; }
+const ALL_THK = [6,8,10,12,16,18,19,22,25,28,30,32,38];
+
+const DEFAULT_SETTINGS = {
+  supplier:'egger', sheetL:2800, sheetW:2070,
+  thk:18, doorThk:18,
+  backMode:'nail', backThk:3, backSheetL:2800, backSheetW:2070, backReduce:2, grooveDepth:8, grooveFromBack:10,
+  kerf:4, trim:10, grain:true, longFirst:true,
+  pvcThin:0.8, pvcThick:2, pvcComp:false, pvcExtra:30,
+  unit:'cm', autoDivMax:800, gap:3, cupC:22.5, drThk:16, drBotThk:8, drClear:25, drBuild:'fbBetween', drMinGap:20, hingeEdge:100, shelfSetback:20, shelfPlay:1
+};
+
+/* Τύποι κουτιών: ο τύπος φέρνει πάχος, στήσιμο, πλάτη */
+const TYPES = {
+  inner:  {label:'Εσωτερικό κουτί (λευκό 16)', thk:16, carcassDecor:'Λευκό', build:'sidesBetween', backMode:'flush', backThk:8, backReduce:0},
+  custom: {label:'Ελεύθερο κουφάρι', thk:18, carcassDecor:'Λευκό', build:'between', backMode:'flush', backThk:8, backReduce:0},
+  casing: {label:'Ντουλάπα με επένδυση', casingThk:18, casingDecor:'Χρώμα', cL:true, cR:true, cTop:true, cBot:true,
+           nb:2, thk:16, carcassDecor:'Λευκό', build:'sidesBetween', backMode:'flush', backThk:8, backReduce:0,
+           clrTB:2, clrSide:2, front:2}
+};
+const uF = s => s && s.unit==='mm' ? 1 : 10;
+function newModule(n,type,unit){
+  type=type||'inner'; const k = unit==='mm'?1:0.1;
+  return {id:'m'+Date.now()+Math.floor(Math.random()*1000), name:'Κουτί '+n, type, qty:1, W:600*k, H:1000*k, D:500*k,
+    ...TYPES[type], kitchenBase:false, traverseW:100, dividers:'auto', shelves:2,
+    doors:2, overlay:'full', doorH:'', hingeSide:'auto', doorDecor:'Χρώμα', drawers:0, drH:150, drLen:'auto', drFront:'none',
+    withCasing:false, casingThk:18, casingDecor:'Χρώμα', cL:true, cR:true, cTop:true, cBot:true, clrTB:2, clrSide:2, front:2, ...(type==='casing'?TYPES.casing:{}), ovr:{}};
+}
+
+const r1 = x => Math.round(x*10)/10;
+const fmt = x => (Math.round(x*10)/10).toString().replace('.',',');
+
+/* Κομμάτια ενός κουτιού (τελικές διαστάσεις, πριν την αφαίρεση PVC).
+   L = διάσταση κατά τα νερά (πρώτη), W = δεύτερη. edges = [L1 μπροστά, L2, W1, W2], 0=χωρίς,1=λεπτό,2=χοντρό */
+/* Ντουλάπα με επένδυση: επένδυση (όρθια ανάμεσα σε πάνω/κάτω) + εσωτερικά κουτιά + πόρτες μέσα στην επένδυση */
+function genCasing(m,s){
+  const U=uF(s), W=+m.W*U, H=+m.H*U, D=+m.D*U, q=+m.qty||1, Tc=+m.casingThk, Td=+s.doorThk, g=+s.gap;
+  const P=[], warns=[];
+  const add=(key,name,L,Wd,qty,thk,decor,edges,kind)=>{ if(qty>0) P.push({key,name,L:r1(L),W:r1(Wd),qty:qty*q,thk,decor,edges:(m.ovr&&m.ovr[key])||edges,kind}); };
+  const nT=(m.cTop?1:0)+(m.cBot?1:0), nS=(m.cL?1:0)+(m.cR?1:0);
+  const cd=m.casingDecor||'Χρώμα';
+  // Επένδυση
+  if(nS) add('c_side','Επένδυση πλαϊνό', H-nT*Tc, D, nS, Tc, cd, [1,0,0,0],'casing');
+  if(nT) add('c_tb','Επένδυση πάνω/κάτω', W, D, nT, Tc, cd, [1,0,0,0],'casing');
+  const Wi=W-nS*Tc, Hi=H-nT*Tc;
+  const nd=+m.doors||0;
+  const Db = nd>0 ? D-Td-(+m.front) : D;
+  const nb=Math.max(0,+m.nb||0);
+  let info={nd:0};
+  if(nb>0){
+    const bw=Wi/nb;
+    const box={...m, _mm:true, type:'inner', W:bw, H:Hi, D:Db, qty:nb, doors:0, kitchenBase:false, drFront:'none'};
+    const r=genParts(box,s);
+    r.parts.forEach(p=>{ p.name='Κουτί: '+p.name; p.qty*=q; P.push(p); });
+    r.warns.forEach(w=>warns.push(w));
+    info.bw=r1(bw);
+  }
+  if(nd>0){
+    const tTop = m.cTop? +m.clrTB : g/2, tBot = m.cBot? +m.clrTB : g/2;
+    const sL = m.cL? +m.clrSide : g/2, sR = m.cR? +m.clrSide : g/2;
+    let dH = Hi - tTop - tBot;
+    if(m.doorH!=='' && m.doorH!=null && +m.doorH>0) dH=+m.doorH*U;
+    const dW = (Wi - sL - sR - (nd-1)*g)/nd;
+    add('door','Πόρτα', dH, dW, nd, Td, m.doorDecor||'Χρώμα', [2,2,2,2],'door');
+    info={...info, nd, doorW:r1(dW), doorH:r1(dH), doorBottom:tBot};
+    if(dW>650) warns.push('Πόρτα φάρδους '+fmt(dW)+'mm — βάλε περισσότερες πόρτες ή επιπλέον μεντεσέ.');
+    if(nb>0 && nd%nb!==0) warns.push('Οι πόρτες ('+nd+') δεν μοιράζονται ίσα στα κουτιά ('+nb+') — έλεγξε ότι πέφτουν σωστά στα όρθια.');
+  }
+  if(Db<=0) warns.push('Το βάθος των κουτιών βγαίνει αρνητικό.');
+  info={...info, Wi:r1(Wi), Hi:r1(Hi), Db:r1(Db), outer:[r1(W),r1(H),r1(D)]};
+  return {parts:P, warns, info};
+}
+
+function genParts(m, s){
+  if(m.type==='casing') return genCasing(m,s);
+  if(m.withCasing && !m._mm){
+    // Κουτί + επένδυση γύρω του: η επένδυση βγαίνει από τα μέτρα του κουτιού
+    const U=uF(s), Tc=+m.casingThk||18, nS=(m.cL?1:0)+(m.cR?1:0), nT=(m.cTop?1:0)+(m.cBot?1:0);
+    const nd=+m.doors||0, extra = nd>0 ? (+s.doorThk)+(+m.front||0) : 0;
+    const mc={...m, type:'casing', nb:1, W:(+m.W*U+nS*Tc)/U, H:(+m.H*U+nT*Tc)/U, D:(+m.D*U+extra)/U};
+    const r=genCasing(mc,s);
+    if(m.kitchenBase) r.warns.push('Με επένδυση το κουτί βγαίνει με πάνω/κάτω (όχι τραβέρσες).');
+    if(+m.drawers>0 && m.drFront==='overlay') r.warns.push('Με επένδυση τα συρτάρια βγαίνουν εσωτερικά (χωρίς μέτωπα).');
+    return r;
+  }
+  const U = m._mm ? 1 : uF(s);
+  const T=+m.thk, DT=+s.doorThk, W=+m.W*U, H=+m.H*U, D=+m.D*U, q=+m.qty||1;
+  const bm=m.backMode;
+  const bT = bm==='none'?0:+m.backThk;
+  const Dc = bm==='flush' ? D - bT : D;
+  const Din = bm==='groove' ? Dc - (+s.grooveFromBack) - bT : Dc;
+  const P=[]; const warns=[];
+  const add=(key,name,L,Wd,qty,thk,decor,edges,kind)=>{ if(qty>0) P.push({key,name,L:r1(L),W:r1(Wd),qty:qty*q,thk,decor,edges:(m.ovr&&m.ovr[key])||edges,kind}); };
+  const cd=m.carcassDecor||'Κουφάρι', dd=m.doorDecor||'Πόρτες';
+  const topover = m.build==='topover' && !m.kitchenBase;
+  const sb = m.build==='sidesBetween';
+  if(sb){
+    // Όρθια ανάμεσα σε πάνω & κάτω
+    add('side','Όρθιο', m.kitchenBase? H-T : H-2*T, Dc, 2, T, cd, [1,0,0,0],'carcass');
+    add('bottom','Κάτω', W, Dc, 1, T, cd, [1,0,0,0],'carcass');
+    if(m.kitchenBase) add('trav','Τραβέρσα', W-2*T, +m.traverseW, 2, T, cd, [1,0,0,0],'carcass');
+    else add('top','Πάνω', W, Dc, 1, T, cd, [1,0,0,0],'carcass');
+  } else {
+  // Πλαϊνά
+  add('side','Πλαϊνό', topover? H-T : H, Dc, 2, T, cd, [1,0,0,0],'carcass');
+  // Πάτος
+  add('bottom','Πάτος', W-2*T, Dc, 1, T, cd, [1,0,0,0],'carcass');
+  // Καπάκι / τραβέρσες
+  if(m.kitchenBase){
+    add('trav','Τραβέρσα', W-2*T, +m.traverseW, 2, T, cd, [1,0,0,0],'carcass');
+  } else if(topover){
+    add('top','Καπάκι (πάνω από πλαϊνά)', W, Dc, 1, T, cd, [1,0,1,1],'carcass');
+  } else {
+    add('top','Καπάκι', W-2*T, Dc, 1, T, cd, [1,0,0,0],'carcass');
+  }
+  }
+  const innerH = H-2*T;
+  let n;
+  if(m.dividers==='auto' || m.dividers==null || m.dividers===''){
+    const span=W-2*T, mx=+s.autoDivMax||800;
+    n = ((+m.drawers||0)>0) ? 0 : (span>mx ? Math.ceil(span/(mx+T))-1 : 0);
+    while(n<20 && (span-n*T)/(n+1)>mx) n++;
+  } else n=+m.dividers||0;
+  if(n>0) add('div','Μεσοχώρισμα (κάθετο)', innerH, Din, n, T, cd, [1,0,0,0],'carcass');
+  const sw = (W-2*T-n*T)/(n+1);
+  const k=+m.shelves||0;
+  if(k>0) add('shelf','Ράφι', sw-(+s.shelfPlay), Din-(+s.shelfSetback), k*(n+1), T, cd, [1,0,0,0],'carcass');
+  if(sw<100) warns.push('Πολύ στενό χώρισμα ('+fmt(sw)+'mm).');
+  // Συρτάρια
+  const nDr=+m.drawers||0; let drInfo=null;
+  if(nDr>0){
+    const tD=+s.drThk, bD=+s.drBotThk;
+    const Wd = (W-2*T) - (+s.drClear);
+    let Ld;
+    if(m.drLen && m.drLen!=='auto') Ld=+m.drLen;
+    else { Ld=0; for(const l of RUNNERS) if(l<=Din-5) Ld=l; }
+    const hd=+m.drH;
+    if(!Ld) warns.push('Δεν χωράει οδηγός συρταριού (εσωτερικό βάθος '+fmt(Din)+'mm).');
+    else {
+      if(Ld>Din) warns.push('Ο οδηγός '+Ld+'mm είναι μεγαλύτερος από το εσωτερικό βάθος '+fmt(Din)+'mm.');
+      if(s.drBuild==='fbBetween'){
+        add('dr_side','Συρτάρι: πλαϊνό', Ld, hd, 2*nDr, tD, cd, [1,0,0,0],'carcass');
+        add('dr_fb','Συρτάρι: μπρος/πίσω', Wd-2*tD, hd, 2*nDr, tD, cd, [1,0,0,0],'carcass');
+      } else {
+        add('dr_side','Συρτάρι: πλαϊνό', Ld-2*tD, hd, 2*nDr, tD, cd, [1,0,0,0],'carcass');
+        add('dr_fb','Συρτάρι: μπρος/πίσω', Wd, hd, 2*nDr, tD, cd, [1,0,0,0],'carcass');
+      }
+      add('dr_bot','Συρτάρι: πάτος', Ld, Wd, nDr, bD, cd, [0,0,0,0],'carcass');
+      const need = nDr*(hd+bD) + nDr*(+s.drMinGap);
+      if(need>innerH) warns.push('Τα '+nDr+' συρτάρια ύψους '+(hd+bD)+'mm δεν χωράνε στο εσωτερικό ύψος '+fmt(innerH)+'mm (θέλουν ~'+fmt(need)+'mm με κενά).');
+      if(n>0) warns.push('Συρτάρια με κάθετα μεσοχωρίσματα: υπολογίζονται σε όλο το φάρδος του κουτιού.');
+      drInfo={Wd:r1(Wd),Ld,hd};
+    }
+  }
+  // Πλάτη
+  const bdec = bT<=5 ? 'Πλάτη HDF' : cd;
+  if(bm==='flush'){ const rr=+m.backReduce||0; add('back','Πλάτη (βιδωτή)', H-2*rr, W-2*rr, 1, bT, bdec, [0,0,0,0],'back'); }
+  if(bm==='groove'){
+    const g=(+s.grooveDepth)-1;
+    add('back','Πλάτη (σε κανάλι)', H-2*T+2*g, W-2*T+2*g, 1, bT, bdec, [0,0,0,0],'back');
+    if(m.kitchenBase) warns.push('Κάτω ντουλάπι με τραβέρσες: η πλάτη σε κανάλι θέλει κανάλι και στην πίσω τραβέρσα.');
+  }
+  // Μέτωπα συρταριών
+  const g0=+s.gap;
+  if(nDr>0 && m.drFront==='overlay'){
+    const fW=W-g0, fH=(H-nDr*g0)/nDr;
+    add('dr_front','Μέτωπο συρταριού', fH, fW, nDr, DT, dd, [2,2,2,2],'door');
+    if(drInfo && drInfo.hd+bTsafe(s) > fH) warns.push('Το συρτάρι ('+drInfo.hd+'+'+s.drBotThk+'mm) είναι ψηλότερο από το μέτωπο ('+fmt(fH)+'mm).');
+  }
+  // Πόρτες
+  const nd = (nDr>0 && m.drFront==='overlay') ? 0 : (+m.doors||0), g=+s.gap;
+  if(nDr>0 && m.drFront==='overlay' && +m.doors>0) warns.push('Με μέτωπα συρταριών οι πόρτες αγνοούνται σε αυτό το κουτί.');
+  let doorW=0, doorH=0, doorBottom=0;
+  if(nd>0){
+    if(m.overlay==='inset'){ doorW=(W-2*T-(nd+1)*g)/nd; doorH=H-2*T-2*g; doorBottom=T+g; }
+    else if(m.overlay==='half'){ doorW=(W-T-nd*g)/nd; doorH=H-g; doorBottom=g/2; }
+    else { doorW=(W-nd*g)/nd; doorH=H-g; doorBottom=g/2; }
+    if(m.doorH!=='' && m.doorH!=null && +m.doorH>0) doorH=+m.doorH*U;
+    add('door','Πόρτα', doorH, doorW, nd, DT, dd, [2,2,2,2],'door');
+    if(doorW>650) warns.push('Πόρτα φάρδους '+fmt(doorW)+'mm — πάνω από 600–650mm οι κατασκευαστές θέλουν επιπλέον μεντεσέ ή περισσότερες πόρτες.');
+  }
+  if(H>(+s.sheetL) && H>(+s.sheetW)) warns.push('Το ύψος '+H+'mm είναι μεγαλύτερο από το φύλλο.');
+  return {parts:P, warns, info:{T,Dc,Din,innerH,sw,nDiv:n,nd,drInfo,doorW:r1(doorW),doorH:r1(doorH),doorBottom}};
+}
+
+function edgeT(v,s){ return v===2? +s.pvcThick : v===1? +s.pvcThin : 0; }
+/* Διάσταση κοπής: αφαιρεί το πάχος PVC από τις αντίστοιχες πλευρές */
+function cutDims(p,s){
+  if(!s.pvcComp) return {L:p.L, W:p.W};
+  const e=p.edges;
+  return {L:r1(p.L-edgeT(e[2],s)-edgeT(e[3],s)), W:r1(p.W-edgeT(e[0],s)-edgeT(e[1],s))};
+}
+function pvcOf(p,s){ // μέτρα ανά πάχος για ένα κομμάτι (όλα τα τεμάχια)
+  const out={}; const e=p.edges; const lens=[p.L,p.L,p.W,p.W];
+  for(let i=0;i<4;i++){ if(!e[i]) continue; const t=edgeT(e[i],s); out[t]=(out[t]||0)+(lens[i]+(+s.pvcExtra))*p.qty/1000; }
+  return out;
+}
+
+/* Αριθμός μεντεσέδων: Blum/Grass για πόρτα έως 600mm πλάτος (+1 αν πιο φαρδιά) */
+function hingeCount(h,w){
+  let c = h<=900?2 : h<=1600?3 : h<=2000?4 : h<=2500?5 : 6;
+  if(w>600) c++;
+  return c;
+}
+function hingePositions(h,w,s){
+  const c=hingeCount(h,w); const e=Math.min(+s.hingeEdge, h/4);
+  const pos=[]; for(let i=0;i<c;i++) pos.push(r1(e+(h-2*e)*i/(c-1)));
+  return pos;
+}
+
+/* Δοκιμάζει πολλές στρατηγικές και κρατά αυτή με τα λιγότερα φύλλα */
+function pack(pieces, SL, SW, kerf, trim, allowRot){
+  const sorts=[
+    (a,b)=> Math.max(b.L,b.W)-Math.max(a.L,a.W) || b.L*b.W-a.L*a.W,
+    (a,b)=> b.L*b.W-a.L*a.W,
+    (a,b)=> b.L-a.L || b.W-a.W,
+    (a,b)=> b.W-a.W || b.L-a.L
+  ];
+  let best=null;
+  for(const so of sorts) for(const rule of ['short','long','horiz','vert']){
+    const r=packOne(pieces,SL,SW,kerf,trim,allowRot,so,rule);
+    const lastY = r.sheets.length? r.sheets[r.sheets.length-1].yield : 0;
+    if(!best || r.sheets.length<best.sheets.length || (r.sheets.length===best.sheets.length && lastY<best.lastY)) best={...r,lastY};
+  }
+  return best;
+}
+/* Τοποθέτηση σε φύλλα: guillotine, best-area-fit */
+function packOne(pieces, SL, SW, kerf, trim, allowRot, sorter, rule){
+  const UL=SL-2*trim, UW=SW-2*trim;
+  const items=[];
+  pieces.forEach(p=>{ for(let i=0;i<p.qty;i++) items.push({...p,idx:i}); });
+  items.sort(sorter);
+  const sheets=[]; const over=[];
+  for(const it of items){
+    const fitsEmpty = (it.L<=UL&&it.W<=UW) || (allowRot && it.W<=UL && it.L<=UW);
+    if(!fitsEmpty){ over.push(it); continue; }
+    let best=null;
+    const tryIn=(sh,si)=>{
+      sh.free.forEach((f,fi)=>{
+        const opts=[[it.L,it.W,false]]; if(allowRot && it.L!==it.W) opts.push([it.W,it.L,true]);
+        for(const [pl,pw,rot] of opts){
+          if(pl<=f.w+0.01 && pw<=f.h+0.01){
+            const waste=f.w*f.h-pl*pw;
+            if(!best || waste<best.waste) best={si,fi,pl,pw,rot,waste};
+          }
+        }
+      });
+    };
+    sheets.forEach(tryIn);
+    if(!best){ sheets.push({free:[{x:0,y:0,w:UL,h:UW}],placed:[]}); tryIn(sheets[sheets.length-1],sheets.length-1); }
+    const sh=sheets[best.si], f=sh.free[best.fi];
+    sh.placed.push({x:f.x,y:f.y,w:best.pl,h:best.pw,rot:best.rot,p:it});
+    sh.free.splice(best.fi,1);
+    const rw=f.w-best.pl-kerf, bh=f.h-best.pw-kerf;
+    // διαχωρισμός κατά τη μικρότερη υπόλοιπη πλευρά
+    const splitH = rule==='horiz' ? true : rule==='vert' ? false : rule==='short' ? rw<bh : rw>=bh;
+    if(splitH){
+      if(rw>0) sh.free.push({x:f.x+best.pl+kerf,y:f.y,w:rw,h:best.pw});
+      if(bh>0) sh.free.push({x:f.x,y:f.y+best.pw+kerf,w:f.w,h:bh});
+    } else {
+      if(rw>0) sh.free.push({x:f.x+best.pl+kerf,y:f.y,w:rw,h:f.h});
+      if(bh>0) sh.free.push({x:f.x,y:f.y+best.pw+kerf,w:best.pl,h:bh});
+    }
+  }
+  sheets.forEach(sh=>{ sh.used=sh.placed.reduce((a,c)=>a+c.w*c.h,0); sh.yield=sh.used/(SL*SW); });
+  return {sheets,over};
+}
+
+/* Συγκέντρωση όλων */
+function computeAll(state){
+  const s=state.settings; const all=[]; const warns=[]; const doors=[];
+  state.modules.forEach((m,mi)=>{
+    const r=genParts(m,s);
+    r.parts.forEach(p=>all.push({...p, mod:m.name, mid:m.id}));
+    r.warns.forEach(w=>warns.push(m.name+': '+w));
+    if(r.info.nd>0){
+      const pos=hingePositions(r.info.doorH, r.info.doorW, s);
+      const span=pos[pos.length-1]-pos[0];
+      const sides=[];
+      for(let i=0;i<r.info.nd;i++){
+        let side;
+        if(m.hingeSide==='L') side='Α'; else if(m.hingeSide==='R') side='Δ';
+        else side = r.info.nd===1 ? 'Α' : (i%2===0?'Α':'Δ');
+        sides.push(side);
+      }
+      doors.push({mod:m.name, qty:+m.qty||1, n:r.info.nd, w:r.info.doorW, h:r.info.doorH, pos,
+        sidePos:pos.map(p=>r1(p+r.info.doorBottom)), sides, spanWarn: span<=r.info.doorW, overlay:m.overlay});
+    }
+  });
+  state.extras.forEach(x=>{
+    if(+x.L>0 && +x.W>0 && +x.qty>0)
+      all.push({key:'x', name:x.name||'Κομμάτι', L:+x.L*uF(s), W:+x.W*uF(s), qty:+x.qty, thk:+x.thk, decor:x.decor||'Λευκό', edges:x.edges, kind:'extra', mod:'Ελεύθερα', xid:x.id});
+  });
+  if(s.longFirst) all.forEach(p=>{ if(p.W>p.L){ [p.L,p.W]=[p.W,p.L]; p.edges=[p.edges[2],p.edges[3],p.edges[0],p.edges[1]]; p.swapped=true; } });
+  all.forEach(p=>{ const c=cutDims(p,s); p.cL=c.L; p.cW=c.W; if(p.cL<=0||p.cW<=0) warns.push(p.mod+' / '+p.name+': αρνητική διάσταση — έλεγξε τα μέτρα.'); });
+  // ομάδες υλικού
+  const groups={};
+  all.forEach(p=>{ const k=p.decor+' '+p.thk+'mm'; (groups[k]=groups[k]||{name:k,decor:p.decor,thk:p.thk,back:p.kind==='back'&&p.thk<=5,parts:[]}).parts.push(p); });
+  const pvc={};
+  all.forEach(p=>{ const o=pvcOf(p,s); for(const t in o) pvc[t]=(pvc[t]||0)+o[t]; });
+  Object.values(groups).forEach(g=>{
+    const SL=g.back? +s.backSheetL : +s.sheetL, SW=g.back? +s.backSheetW : +s.sheetW;
+    g.SL=SL; g.SW=SW;
+    g.area=g.parts.reduce((a,p)=>a+p.cL*p.cW*p.qty,0)/1e6;
+    const allowRot = g.back ? true : !s.grain;
+    g.pack=pack(g.parts.map(p=>({L:p.cL,W:p.cW,qty:p.qty,name:p.name,mod:p.mod,label:p.label})), SL, SW, +s.kerf, +s.trim, allowRot);
+    if(g.pack.over.length) warns.push(g.name+': '+g.pack.over.length+' κομμάτια δεν χωράνε στο φύλλο '+SL+'×'+SW+(s.grain&&!g.back?' (με κλειδωμένα νερά)':'')+'.');
+  });
+  return {all,groups,pvc,warns,doors};
+}
+</script>
+
+<script>
+/* ===== UI ===== */
+let state;
+const LS='melamini_v1';
+function load(){
+  try{ const j=localStorage.getItem(LS); if(j){ const o=JSON.parse(j); const os=o.settings||{}; o.settings={...DEFAULT_SETTINGS,...os};
+    o.modules=(o.modules||[]).map(m=> m.type? m : {...TYPES.custom, thk:os.thk||18, backMode: os.backMode==='groove'?'groove':os.backMode==='none'?'none':'flush', backThk:os.backThk||3, backReduce:os.backReduce||0, carcassDecor:'Λευκό', ...m, type:'custom'});
+    o.extras=o.extras||[]; if(!o.v){ o.settings.pvcComp=false; o.v=2; }
+    if(o.v<3){ o.settings.unit='cm'; const d=x=>(x===''||x==null)?x:+x/10;
+      o.modules.forEach(m=>{ m.W=d(m.W); m.H=d(m.H); m.D=d(m.D); m.doorH=d(m.doorH); if(!m.dividers) m.dividers='auto'; });
+      o.extras.forEach(x=>{ x.L=d(x.L); x.W=d(x.W); }); o.v=3; }
+    const CD={withCasing:false, casingThk:18, casingDecor:'Χρώμα', cL:true, cR:true, cTop:true, cBot:true, clrTB:2, clrSide:2, front:2};
+    o.modules.forEach(m=>{ for(const k in CD) if(m[k]===undefined) m[k]=CD[k]; });
+    if(o.settings.longFirst===undefined) o.settings.longFirst=true;
+    return o; } }catch(e){}
+  return {v:3, settings:{...DEFAULT_SETTINGS}, modules:[newModule(1,'inner','cm')], extras:[]};
+}
+function save(){ try{ localStorage.setItem(LS, JSON.stringify(state)); }catch(e){} }
+state=load();
+
+const $=s=>document.querySelector(s);
+const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function toast(t){ const el=$('#toast'); el.textContent=t; el.classList.add('on'); setTimeout(()=>el.classList.remove('on'),1600); }
+let cur='project';
+document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>{ cur=b.dataset.t; document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('on',x===b)); document.querySelectorAll('main>section').forEach(x=>x.classList.toggle('hide',x.id!=='t-'+cur)); render(); window.scrollTo(0,0); });
+
+function sel(name,val,opts){ return `<select data-k="${name}">${opts.map(o=>`<option value="${o[0]}" ${String(o[0])===String(val)?'selected':''}>${o[1]}</option>`).join('')}</select>`; }
+
+/* --- Έργο --- */
+const UN=()=> state.settings.unit==='mm'?'mm':'cm';
+function backFields(m){
+  return `<label>Πλάτη${sel('backMode',m.backMode,[['flush','Βιδωτή από πίσω (έξω μέγεθος)'],['groove','Σε κανάλι'],['none','Χωρίς πλάτη']])}</label>
+        ${m.backMode!=='none'?`<label>Πάχος πλάτης${sel('backThk',m.backThk,[[3,'3 mm HDF'],[4,'4 mm HDF'],[5,'5 mm HDF'],[8,'8 mm μελαμίνη'],[10,'10 mm'],[16,'16 mm'],[18,'18 mm']])}</label>`:''}
+        ${m.backMode==='flush'?`<label>Πλάτη μικρότερη ανά πλευρά (mm)<input type="number" data-k="backReduce" value="${m.backReduce}"></label>`:''}`;
+}
+function casingFields(m){
+  return `<h3>Επένδυση</h3>
+      <div class="grid">
+        <label>Τύπος${sel('type',m.type,Object.entries(TYPES).map(([k,v])=>[k,v.label]))}</label>
+        <label>Πάχος επένδυσης${sel('casingThk',m.casingThk,ALL_THK.map(t=>[t,t+' mm']))}</label>
+        <label>Χρώμα επένδυσης<input data-k="casingDecor" value="${esc(m.casingDecor)}"></label>
+        <label class="chk"><input type="checkbox" data-k="cL" ${m.cL?'checked':''}> Αριστερό πλαϊνό</label>
+        <label class="chk"><input type="checkbox" data-k="cR" ${m.cR?'checked':''}> Δεξί πλαϊνό</label>
+        <label class="chk"><input type="checkbox" data-k="cTop" ${m.cTop?'checked':''}> Πάνω</label>
+        <label class="chk"><input type="checkbox" data-k="cBot" ${m.cBot?'checked':''}> Κάτω</label>
+      </div>
+      <p class="note">Τα πλαϊνά της επένδυσης μπαίνουν ανάμεσα σε πάνω & κάτω. Βάλε πάνω τις <b>έξω</b> διαστάσεις όλης της ντουλάπας.</p>
+      <h3>Κουτιά μέσα</h3>
+      <div class="grid">
+        <label>Πόσα κουτιά (δίπλα-δίπλα)<input type="number" min="0" data-k="nb" value="${m.nb}"></label>
+        <label>Πάχος κουτιών${sel('thk',m.thk,ALL_THK.map(t=>[t,t+' mm']))}</label>
+        <label>Χρώμα κουτιών<input data-k="carcassDecor" value="${esc(m.carcassDecor)}"></label>
+        ${backFields(m)}
+        <label>Χωρίσματα σε κάθε κουτί (κενό = αυτόματα)<input type="number" min="0" inputmode="numeric" data-k="dividers" value="${(m.dividers==='auto'||m.dividers==null)?'':m.dividers}" placeholder="αυτόματα"></label>
+        <label>Ράφια ανά χώρισμα<input type="number" min="0" data-k="shelves" value="${m.shelves}"></label>
+      </div>`;
+}
+function modSummary(m){
+  const r=genParts(m,state.settings); const i=r.info;
+  if(m.type!=='casing' && m.withCasing && i.outer){
+    let t=`Με επένδυση, έξω: <b>${fmt(i.outer[0])} × ${fmt(i.outer[1])} × ${fmt(i.outer[2])} mm</b> · κουτί <b>${fmt(i.Wi)} × ${fmt(i.Hi)} × ${fmt(i.Db)}</b>`;
+    if(i.nd) t+=` · πόρτες <b>${fmt(i.doorH)} × ${fmt(i.doorW)}</b>`;
+    return t;
+  }
+  if(m.type==='casing'){
+    let t=`Μέσα στην επένδυση (mm): <b>${fmt(i.Wi)} × ${fmt(i.Hi)}</b>`;
+    if(i.bw){ t+=` · κάθε κουτί <b>${fmt(i.bw)} × ${fmt(i.Hi)} × ${fmt(i.Db)}</b>`; const bi=genParts({...m,_mm:true,type:'inner',W:i.bw,H:i.Hi,D:i.Db,qty:1,doors:0,drFront:'none'},state.settings).info; if(bi.nDiv) t+=` με ${bi.nDiv} χώρισμα`; }
+    if(i.nd) t+=` · πόρτες <b>${fmt(i.doorH)} × ${fmt(i.doorW)}</b>`;
+    if(+m.drawers>0){ const b=genParts({...m,type:'inner',W:i.bw||0,H:i.Hi,D:i.Db,qty:1,doors:0,dividers:0,drFront:'none'},state.settings).info.drInfo; if(b) t+=` · συρτάρι <b>${fmt(b.Wd)} × ${b.Ld} × ${b.hd+(+state.settings.drBotThk)}</b> (φάρδος × οδηγός × ύψος)`; }
+    return t;
+  }
+  let t = `Κουτί <b>${fmt(+m.W*uF(state.settings))} × ${fmt(+m.H*uF(state.settings))} × ${fmt(+m.D*uF(state.settings))} mm</b>` + (i.nDiv?` · <b>${i.nDiv} ${i.nDiv>1?'χωρίσματα':'χώρισμα'}</b> (άνοιγμα ${fmt(i.sw)}mm)`:'');
+  t += i.nd? ` · Πόρτες <b>${fmt(i.doorH)} × ${fmt(i.doorW)}</b>` : '';
+  if(i.drInfo) t+=(t?' · ':'')+`Συρτάρι <b>${fmt(i.drInfo.Wd)} × ${i.drInfo.Ld} × ${i.drInfo.hd+(+state.settings.drBotThk)}</b> (φάρδος × οδηγός × ύψος)`;
+  return t;
+}
+function renderProject(){
+  const s=state.settings;
+  let h=`<div class="card note">Βάλε τις <b>εξωτερικές</b> διαστάσεις κάθε κουτιού σε <b>${UN()==='cm'?'εκατοστά':'χιλιοστά'}</b> (το βάθος μαζί με την πλάτη). Πόρτες: <b>${s.doorThk}mm</b>, φύλλο: <b>${s.sheetL}×${s.sheetW}</b> — στις Ρυθμίσεις.</div>`;
+  state.modules.forEach((m,i)=>{
+    h+=`<div class="card mod" data-m="${i}">
+      <div class="modhead"><input data-k="name" value="${esc(m.name)}" style="max-width:60%"><div class="row"><button class="btn" data-act="dup">Αντίγραφο</button><button class="btn del" data-act="del">Διαγραφή</button></div></div>
+      <div class="grid">
+        <label>Φάρδος (${UN()})<input type="number" inputmode="decimal" data-k="W" value="${m.W}"></label>
+        <label>Ύψος (${UN()})<input type="number" inputmode="decimal" data-k="H" value="${m.H}"></label>
+        <label>Βάθος (${UN()})<input type="number" inputmode="decimal" data-k="D" value="${m.D}"></label>
+        <label>Τεμάχια<input type="number" inputmode="numeric" data-k="qty" value="${m.qty}"></label>
+      </div>
+      ${m.type==='casing'? casingFields(m) : `<h3>Κουφάρι</h3>
+      <div class="grid">
+        <label>Τύπος${sel('type',m.type,Object.entries(TYPES).map(([k,v])=>[k,v.label]))}</label>
+        <label>Πάχος${sel('thk',m.thk,ALL_THK.map(t=>[t,t+' mm']))}</label>
+        <label>Στήσιμο${sel('build',m.build,[['sidesBetween','Όρθια ανάμεσα σε πάνω & κάτω'],['between','Πάνω & κάτω ανάμεσα στα όρθια'],['topover','Καπάκι πάνω από τα πλαϊνά']])}</label>
+        ${backFields(m)}
+        <label class="chk" style="margin-top:16px"><input type="checkbox" data-k="kitchenBase" ${m.kitchenBase?'checked':''}> Κάτω κουζίνας (τραβέρσες αντί καπάκι)</label>
+        ${m.kitchenBase?`<label>Φάρδος τραβέρσας (mm)<input type="number" data-k="traverseW" value="${m.traverseW}"></label>`:''}
+        <label>Κάθετα χωρίσματα (κενό = αυτόματα)<input type="number" min="0" inputmode="numeric" data-k="dividers" value="${(m.dividers==='auto'||m.dividers==null)?'':m.dividers}" placeholder="αυτόματα"></label>
+        <label>Ράφια ανά χώρισμα<input type="number" min="0" data-k="shelves" value="${m.shelves}"></label>
+        <label>Χρώμα κουφαριού<input data-k="carcassDecor" value="${esc(m.carcassDecor)}"></label>
+      </div>
+      <h3>Επένδυση</h3>
+      <label class="chk"><input type="checkbox" data-k="withCasing" ${m.withCasing?'checked':''}> Βγάλε και επένδυση γύρω από το κουτί</label>
+      ${m.withCasing?`<div class="grid" style="margin-top:8px">
+        <label>Πάχος επένδυσης${sel('casingThk',m.casingThk,ALL_THK.map(t=>[t,t+' mm']))}</label>
+        <label>Χρώμα επένδυσης<input data-k="casingDecor" value="${esc(m.casingDecor)}"></label>
+        <label class="chk"><input type="checkbox" data-k="cL" ${m.cL?'checked':''}> Αριστερό πλαϊνό</label>
+        <label class="chk"><input type="checkbox" data-k="cR" ${m.cR?'checked':''}> Δεξί πλαϊνό</label>
+        <label class="chk"><input type="checkbox" data-k="cTop" ${m.cTop?'checked':''}> Πάνω</label>
+        <label class="chk"><input type="checkbox" data-k="cBot" ${m.cBot?'checked':''}> Κάτω</label>
+      </div><p class="note">Τα μέτρα πάνω είναι του <b>κουτιού</b>. Η επένδυση μπαίνει γύρω του (πλαϊνά ανάμεσα σε πάνω & κάτω) και, αν έχει πόρτες, βγαίνει μπροστά όσο η πόρτα + τον αέρα που ορίζεις.</p>`:''}`}
+      <h3>Συρτάρια${m.type==='casing'?' (σε κάθε κουτί, εσωτερικά)':''}</h3>
+      <div class="grid">
+        <label>Αριθμός συρταριών<input type="number" min="0" data-k="drawers" value="${m.drawers||0}"></label>
+        <label>Ύψος πλαϊνού συρταριού (mm)<input type="number" data-k="drH" value="${m.drH||150}"></label>
+        <label>Μήκος οδηγού${sel('drLen',m.drLen||'auto',[['auto','Αυτόματα (μεγαλύτερος που χωράει)'],...RUNNERS.map(l=>[l,l+' mm'])])}</label>
+        ${m.type!=='casing'?`<label>Μέτωπα${sel('drFront',m.drFront||'none',[['none','Χωρίς μέτωπο (πίσω από πόρτα)'],['overlay','Με μέτωπα (αντί για πόρτες)']])}</label>`:''}
+      </div>
+      <h3>Πόρτες</h3>
+      <div class="grid">
+        <label>Αριθμός πορτών<input type="number" min="0" data-k="doors" value="${m.doors}"></label>
+        ${(m.type==='casing'||m.withCasing)? `
+        <label>Αέρας πόρτας πάνω/κάτω από επένδυση (mm)<input type="number" step="0.5" data-k="clrTB" value="${m.clrTB}"></label>
+        <label>Αέρας πόρτας στα πλάγια από επένδυση (mm)<input type="number" step="0.5" data-k="clrSide" value="${m.clrSide}"></label>
+        <label>Επένδυση πιο μπροστά από πόρτα (mm)<input type="number" step="0.5" data-k="front" value="${m.front}"></label>`
+        : `<label>Τύπος${sel('overlay',m.overlay,[['full','Ολική επικάλυψη (καλύπτει πλαϊνό)'],['half','Μισή επικάλυψη (κοινό πλαϊνό)'],['inset','Χωνευτή (μέσα στο κουτί)']])}</label>`}
+        <label>Ύψος πόρτας σε ${UN()} (κενό = αυτόματο)<input type="number" data-k="doorH" value="${m.doorH}" placeholder="αυτόματο"></label>
+        <label>Μεντεσέδες${sel('hingeSide',m.hingeSide,[['auto','Αυτόματα (Α/Δ ανά ζεύγος)'],['L','Όλες αριστερά'],['R','Όλες δεξιά']])}</label>
+        <label>Χρώμα πορτών<input data-k="doorDecor" value="${esc(m.doorDecor)}"></label>
+      </div>
+      <div class="note" data-sum style="margin-top:8px">${modSummary(m)}</div>
+      ${Object.keys(m.ovr||{}).length?`<div class="note" style="margin-top:8px">Έχεις αλλάξει PVC σε κομμάτια αυτού του κουτιού. <button class="btn" data-act="resetovr">Επαναφορά PVC</button></div>`:''}
+    </div>`;
+  });
+  h+=`<div class="row" style="margin-bottom:14px"><button class="btn pri" data-act="addc">+ Ντουλάπα με επένδυση</button><button class="btn pri" data-act="add">+ Κουτί</button><button class="btn" data-act="addx">+ Ελεύθερο κομμάτι</button></div>
+  <button class="btn pri" data-act="go" style="width:100%;padding:14px;font-size:16px;margin-bottom:14px">Βγάλε τα μέτρα →</button>`;
+  if(state.extras.length){
+    h+=`<div class="card"><h2>Ελεύθερα κομμάτια</h2><p class="note">Για ό,τι δεν είναι κουτί: πάγκοι, ποδιές, ράφια τοίχου, μπάζα. Πάτα τις πλευρές στο σχεδιάκι για να βάλεις PVC (γκρι=χωρίς, μπλε=λεπτό, πορτοκαλί=χοντρό).</p>`;
+    state.extras.forEach((x,i)=>{
+      h+=`<div data-x="${i}" style="border-top:1px solid var(--line);padding-top:8px;margin-top:8px">
+       <div class="grid">
+        <label>Όνομα<input data-k="name" value="${esc(x.name)}"></label>
+        <label>Μήκος, νερά (${UN()})<input type="number" data-k="L" value="${x.L}"></label>
+        <label>Πλάτος (${UN()})<input type="number" data-k="W" value="${x.W}"></label>
+        <label>Τεμάχια<input type="number" data-k="qty" value="${x.qty}"></label>
+        <label>Πάχος${sel('thk',x.thk,ALL_THK.map(t=>[t,t+' mm']))}</label>
+        <label>Χρώμα<input data-k="decor" value="${esc(x.decor)}"></label>
+       </div>
+       <div class="row" style="margin-top:6px"><span class="edge" data-xe="${i}">${edgeSvg(x.edges,90,48)}</span><button class="btn del" data-act="delx">Διαγραφή</button></div>
+      </div>`;
+    });
+    h+=`</div>`;
+  }
+  $('#t-project').innerHTML=h;
+}
+$('#t-project').addEventListener('input',e=>{
+  const t=e.target, k=t.dataset.k; if(!k) return;
+  const mEl=t.closest('[data-m]'), xEl=t.closest('[data-x]');
+  const v = t.type==='checkbox'? t.checked : (t.type==='number' || ['thk','backThk','casingThk'].includes(k) || ((k==='drLen'||k==='dividers') && t.value!=='auto')) ? (t.value===''?'':+t.value) : t.value;
+  if(mEl){ const m=state.modules[+mEl.dataset.m];
+    if(k==='type'){ Object.assign(m,TYPES[v]); m.type=v; m.ovr={}; save(); renderProject(); return; }
+    m[k]=v; if(['kitchenBase','backMode','build','drFront','withCasing'].includes(k)){ save(); renderProject(); return; }
+    const sm=mEl.querySelector('[data-sum]'); if(sm) sm.innerHTML=modSummary(m); }
+  if(xEl){ state.extras[+xEl.dataset.x][k]=v; }
+  save();
+});
+
+$('#t-project').addEventListener('click',e=>{
+  const b=e.target.closest('[data-act]');
+  const xe=e.target.closest('[data-xe]');
+  if(xe && e.target.dataset.side!=null){ const x=state.extras[+xe.dataset.xe]; const i=+e.target.dataset.side; x.edges[i]=(x.edges[i]+1)%3; save(); renderProject(); return; }
+  if(!b) return; const a=b.dataset.act; const mEl=b.closest('[data-m]'), xEl=b.closest('[data-x]');
+  if(a==='go'){ save(); document.querySelector('#tabs button[data-t=cut]').click(); return; }
+  const un=state.settings.unit, kk=un==='mm'?1:0.1;
+  if(a==='add'){ state.modules.push(newModule(state.modules.length+1,'inner',un)); }
+  if(a==='addc'){ const m=newModule(state.modules.length+1,'casing',un); m.name='Ντουλάπα '+(state.modules.length+1); m.W=2000*kk; m.H=2600*kk; m.D=600*kk; m.doors=4; state.modules.push(m); }
+  if(a==='addx'){ state.extras.push({id:'x'+Date.now(),name:'Κομμάτι',L:1000*kk,W:400*kk,qty:1,thk:18,decor:'Χρώμα',edges:[1,0,0,0]}); }
+  if(a==='del'){ state.modules.splice(+mEl.dataset.m,1); }
+  if(a==='dup'){ const m=JSON.parse(JSON.stringify(state.modules[+mEl.dataset.m])); m.id='m'+Date.now(); m.name+=' (2)'; state.modules.splice(+mEl.dataset.m+1,0,m); }
+  if(a==='resetovr'){ state.modules[+mEl.dataset.m].ovr={}; }
+  if(a==='delx'){ state.extras.splice(+xEl.dataset.x,1); }
+  save(); renderProject();
+});
+
+/* σχεδιάκι PVC: πάνω=L1 (μπροστά), κάτω=L2, αριστερά=W1, δεξιά=W2 */
+function edgeSvg(e,w,h){
+  const col=v=>v===2?'#b4531a':v===1?'#2563eb':'#d4d0c8';
+  const sw=v=>v?5:3;
+  return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
+   <rect x="8" y="8" width="${w-16}" height="${h-16}" fill="#f3efe8"/>
+   <line data-side="0" x1="8" y1="6" x2="${w-8}" y2="6" stroke="${col(e[0])}" stroke-width="${sw(e[0])+6}" stroke-opacity="${e[0]?1:.6}" stroke-linecap="round"/>
+   <line data-side="1" x1="8" y1="${h-6}" x2="${w-8}" y2="${h-6}" stroke="${col(e[1])}" stroke-width="${sw(e[1])+6}" stroke-opacity="${e[1]?1:.6}" stroke-linecap="round"/>
+   <line data-side="2" x1="6" y1="10" x2="6" y2="${h-10}" stroke="${col(e[2])}" stroke-width="${sw(e[2])+6}" stroke-opacity="${e[2]?1:.6}" stroke-linecap="round"/>
+   <line data-side="3" x1="${w-6}" y1="10" x2="${w-6}" y2="${h-10}" stroke="${col(e[3])}" stroke-width="${sw(e[3])+6}" stroke-opacity="${e[3]?1:.6}" stroke-linecap="round"/>
+   <text x="${w/2}" y="${h/2+4}" font-size="10" text-anchor="middle" fill="#8a8378">μήκος →</text></svg>`;
+}
+function edgeTxt(e,s){
+  const L=[e[0],e[1]].filter(Boolean), W=[e[2],e[3]].filter(Boolean);
+  if(!L.length&&!W.length) return '—';
+  const t=a=>a.map(v=>v===2?s.pvcThick:s.pvcThin).join('+');
+  return [L.length?L.length+'Μ ('+t(L)+')':'', W.length?W.length+'Π ('+t(W)+')':''].filter(Boolean).join(' · ');
+}
+
+/* --- Λίστα κοπής --- */
+let R=null;
+function renderCut(){
+  const s=state.settings; R=computeAll(state);
+  let h='';
+  if(R.warns.length) h+=R.warns.map(w=>`<div class="warn">⚠ ${esc(w)}</div>`).join('');
+  h+=`<div class="card"><h2>Σύνολα</h2><div class="kpi">`;
+  Object.values(R.groups).forEach(g=>{ h+=`<div><span>${esc(g.name)}</span><b>${fmt(g.area)} m²</b><span>${g.pack.sheets.length} φύλλ${g.pack.sheets.length===1?'ο':'α'} ${g.SL}×${g.SW}</span></div>`; });
+  Object.keys(R.pvc).sort().forEach(t=>{ h+=`<div><span>PVC ${String(t).replace('.',',')}mm</span><b>${fmt(R.pvc[t])} m</b><span>μαζί με +${s.pvcExtra}mm/πλευρά</span></div>`; });
+  h+=`</div><div class="row" style="margin-top:10px"><button class="btn pri" id="pdfBtn">Κατέβασμα PDF</button><button class="btn" id="copyList">Αντιγραφή λίστας για κοπτήριο</button></div></div>`;
+  h+=`<div class="legend"><span><i style="background:#d4d0c8"></i>χωρίς PVC</span><span><i style="background:var(--thin)"></i>λεπτό ${s.pvcThin}mm</span><span><i style="background:var(--thick)"></i>χοντρό ${s.pvcThick}mm</span><span>Πάτα πλευρά για αλλαγή · πάνω πλευρά = μπροστινό χείλος</span></div>`;
+  Object.values(R.groups).forEach(g=>{
+    h+=`<div class="card"><h2>${esc(g.name)} <span class="pill">${g.parts.reduce((a,p)=>a+p.qty,0)} τεμ.</span></h2><div style="overflow-x:auto"><table><tr><th>Κουτί / κομμάτι</th><th>Μήκος × Πλάτος κοπής</th><th>Τεμ.</th><th>PVC</th></tr>`;
+    g.parts.forEach(p=>{
+      const diff = p.cL!==p.L || p.cW!==p.W;
+      const ref = p.kind==='extra' ? `data-xid="${p.xid}"` : `data-mid="${p.mid}" data-key="${p.key}"`;
+      h+=`<tr><td><b>${esc(p.name)}</b><span class="fin">${esc(p.mod)}</span></td>
+        <td class="num"><b>${fmt(p.cL)} × ${fmt(p.cW)}</b>${diff?`<span class="fin">τελικό ${fmt(p.L)} × ${fmt(p.W)}</span>`:''}</td>
+        <td class="num">${p.qty}</td>
+        <td class="edge" ${ref}>${p.kind==='back'?'<span class="note">—</span>':edgeSvg(p.edges,74,40)}<span class="fin">${edgeTxt(p.edges,s)}</span></td></tr>`;
+    });
+    h+=`</table></div></div>`;
+  });
+  h+=`<p class="note">Μήκος = κατά τα νερά του σχεδίου. ${s.pvcComp?'Οι διαστάσεις κοπής έχουν αφαιρεμένο το πάχος του PVC.':'Οι διαστάσεις κοπής είναι ίδιες με τις τελικές (χωρίς αφαίρεση PVC).'}</p>`;
+  $('#t-cut').innerHTML=h;
+  $('#copyList').onclick=()=>copyText(listText());
+  $('#pdfBtn').onclick=e=>exportPdf(e.currentTarget);
+}
+$('#t-cut').addEventListener('click',e=>{
+  const side=e.target.dataset && e.target.dataset.side; if(side==null) return;
+  const td=e.target.closest('td.edge'); if(!td) return; const i=+side;
+  const unsw=(p,e)=> p&&p.swapped ? [e[2],e[3],e[0],e[1]] : e;
+  if(td.dataset.xid){ const x=state.extras.find(x=>x.id===td.dataset.xid); const p=R.all.find(p=>p.xid===x.id); const e2=[...p.edges]; e2[i]=(e2[i]+1)%3; x.edges=unsw(p,e2); }
+  else{
+    const m=state.modules.find(m=>m.id===td.dataset.mid); const key=td.dataset.key;
+    const p=R.all.find(p=>p.mid===m.id&&p.key===key);
+    const e2=[...p.edges]; e2[i]=(e2[i]+1)%3; m.ovr=m.ovr||{}; m.ovr[key]=unsw(p,e2);
+  }
+  save(); renderCut();
+});
+function listText(){
+  const s=state.settings; let t='ΛΙΣΤΑ ΚΟΠΗΣ — '+new Date().toLocaleDateString('el-GR')+'\n(Μήκος κατά τα νερά × Πλάτος, mm)\n';
+  Object.values(R.groups).forEach(g=>{
+    t+='\n== '+g.name+' ==\n';
+    g.parts.forEach(p=>{ t+=`${p.mod} / ${p.name}: ${fmt(p.cL)} x ${fmt(p.cW)}  x${p.qty}  PVC: ${edgeTxt(p.edges,s)}\n`; });
+  });
+  t+='\nPVC σύνολο:\n'; Object.keys(R.pvc).sort().forEach(k=>t+=`  ${String(k).replace('.',',')}mm: ${fmt(R.pvc[k])} m\n`);
+  t+='\n(Μ = πλευρά μήκους, Π = πλευρά πλάτους)\n';
+  return t;
+}
+function copyText(t){
+  const ok=()=>toast('Αντιγράφηκε');
+  const fb=()=>{ const ta=document.createElement('textarea'); ta.value=t; document.body.appendChild(ta); ta.select(); try{document.execCommand('copy'); ok();}catch(e){ showText(t);} ta.remove(); };
+  try{ navigator.clipboard.writeText(t).then(ok,fb); }catch(e){ fb(); }
+}
+function showText(t){ const c=document.createElement('div'); c.className='card'; c.innerHTML='<p class="note">Κράτα πατημένο για αντιγραφή:</p><textarea readonly></textarea>'; c.querySelector('textarea').value=t; $('#t-cut').prepend(c); }
+
+/* --- Τρυπήματα --- */
+function renderDrill(){
+  const s=state.settings; R=computeAll(state);
+  let h=`<div class="card note"><b>Μεντεσές:</b> τρύπα <b>Ø35</b>, βάθος <b>13mm</b>, κέντρο στα <b>${fmt(s.cupC)}mm</b> από το χείλος της πόρτας (απόσταση τρύπας ${fmt(s.cupC-17.5)}mm).<br>
+  <b>Βάση μεντεσέ στο πλαϊνό:</b> στα <b>37mm</b> από το μπροστινό χείλος, στο ίδιο ύψος με τον μεντεσέ (βίδες Ø5 ±16mm).<br>
+  <b>Τρύπες ραφιών:</b> Ø5, ανά 32mm, σειρές στα 37mm από μπροστά και από πίσω.<br>
+  Ύψη μετριούνται από <b>κάτω</b>. Α = μεντεσέδες αριστερά, Δ = δεξιά (κοιτώντας την πόρτα απ' έξω).</div>`;
+  if(!R.doors.length) h+=`<div class="card note">Δεν υπάρχουν πόρτες.</div>`;
+  R.doors.forEach(d=>{
+    h+=`<div class="card"><h2>${esc(d.mod)} <span class="pill">${d.n*d.qty} πόρτ${d.n*d.qty===1?'α':'ες'}</span></h2>`;
+    if(d.spanWarn) h+=`<div class="warn">⚠ Η απόσταση πρώτου–τελευταίου μεντεσέ (${fmt(d.pos[d.pos.length-1]-d.pos[0])}mm) δεν είναι μεγαλύτερη από το πλάτος της πόρτας (${fmt(d.w)}mm). Οι κατασκευαστές το ζητούν για σταθερότητα.</div>`;
+    const groups={}; d.sides.forEach(sd=>groups[sd]=(groups[sd]||0)+1);
+    Object.keys(groups).forEach(sd=>{
+      h+=`<div class="door">${doorSvg(d,sd,s)}<div class="txt"><b>${groups[sd]*d.qty} × πόρτα ${fmt(d.h)} × ${fmt(d.w)}</b> — μεντεσέδες ${sd==='Α'?'αριστερά':'δεξιά'}<br>
+      ${d.pos.length} μεντεσέδες, ύψη από κάτω: <b>${d.pos.map(fmt).join(' · ')}</b> mm<br>
+      <span class="note">Στο πλαϊνό (από κάτω του κουτιού): ${d.sidePos.map(fmt).join(' · ')} mm${d.overlay==='inset'?' (χωνευτή)':''}</span></div></div>`;
+    });
+    h+=`</div>`;
+  });
+  $('#t-drill').innerHTML=h;
+}
+function doorSvg(d,sd,s){
+  const H=170, sc=H/d.h, W=Math.max(40,d.w*sc), pad=6;
+  const cx = sd==='Α'? pad+s.cupC*sc : pad+W-s.cupC*sc;
+  const r=Math.max(3,17.5*sc);
+  let c=d.pos.map(p=>`<circle cx="${cx}" cy="${pad+H-p*sc}" r="${r}" fill="none" stroke="#b4531a" stroke-width="2"/>`).join('');
+  return `<svg width="${W+2*pad}" height="${H+2*pad}"><rect x="${pad}" y="${pad}" width="${W}" height="${H}" fill="#f3efe8" stroke="#8a8378"/>${c}</svg>`;
+}
+
+/* --- Πλάκες --- */
+function renderSheets(){
+  R=computeAll(state); const s=state.settings;
+  let h=`<div class="card note">Εκτίμηση τοποθέτησης με πριόνι ${s.kerf}mm και ξάκρισμα ${s.trim}mm ανά πλευρά. ${s.grain?'Τα νερά είναι κλειδωμένα (το μήκος του κομματιού ακολουθεί το μήκος του φύλλου).':'Τα κομμάτια μπορούν να γυρίσουν.'} Το κοπτήριο μπορεί να βγάλει καλύτερο αποτέλεσμα — δες το σαν άνω όριο.</div>`;
+  Object.values(R.groups).forEach(g=>{
+    h+=`<div class="card"><h2>${esc(g.name)} <span class="pill">${g.pack.sheets.length} × ${g.SL}×${g.SW}</span></h2>`;
+    g.pack.sheets.forEach((sh,i)=>{ h+=`<div class="sheet"><div class="note">Φύλλο ${i+1} — αξιοποίηση ${Math.round(sh.yield*100)}%</div>${sheetSvg(sh,g,s)}</div>`; });
+    h+=`</div>`;
+  });
+  $('#t-sheets').innerHTML=h;
+}
+function sheetSvg(sh,g,s){
+  const t=+s.trim; let r=`<svg viewBox="0 0 ${g.SL} ${g.SW}"><rect x="0" y="0" width="${g.SL}" height="${g.SW}" fill="#efe9df"/>`;
+  sh.placed.forEach(p=>{
+    const x=p.x+t,y=p.y+t; const fs=Math.min(60, p.h*0.28, p.w*0.11);
+    r+=`<rect x="${x}" y="${y}" width="${p.w}" height="${p.h}" fill="#fff" stroke="#8a8378" stroke-width="3"/>`;
+    if(fs>14) r+=`<text x="${x+p.w/2}" y="${y+p.h/2}" font-size="${fs}" text-anchor="middle" fill="#1f2328">${esc(p.p.name)}</text><text x="${x+p.w/2}" y="${y+p.h/2+fs*1.1}" font-size="${fs*0.85}" text-anchor="middle" fill="#6b7280">${fmt(p.p.L)}×${fmt(p.p.W)}</text>`;
+  });
+  return r+'</svg>';
+}
+
+/* --- Ρυθμίσεις --- */
+function renderSettings(){
+  const s=state.settings; const sup=SUPPLIERS.find(x=>x.id===s.supplier)||SUPPLIERS[0];
+  const thks = sup.thks.length? [...new Set(sup.thks)].sort((a,b)=>a-b) : ALL_THK;
+  let h=`<div class="card"><h2>Μονάδα & χωρίσματα</h2><div class="grid">
+    <label>Μετράω σε${sel('unit',s.unit,[['cm','Εκατοστά (cm)'],['mm','Χιλιοστά (mm)']])}</label>
+    <label>Αυτόματο χώρισμα όταν το άνοιγμα ξεπερνά (mm)<input type="number" data-k="autoDivMax" value="${s.autoDivMax}"></label>
+   </div><p class="note" style="margin-top:8px">Τα έξω μέτρα των κουτιών γράφονται στη μονάδα που διαλέγεις. Η λίστα κοπής και τα μικρά νούμερα (αέρας, κενά) είναι πάντα σε χιλιοστά.</p></div>
+  <div class="card"><h2>Πλάκα μελαμίνης</h2><div class="grid">
+    <label>Προμηθευτής${sel('supplier',s.supplier,SUPPLIERS.map(x=>[x.id,x.name]))}</label>
+    ${sup.sizes.length?`<label>Μέγεθος φύλλου${sel('sizePreset',s.sheetL+'x'+s.sheetW,[...sup.sizes.map(z=>[z[0]+'x'+z[1],z[0]+' × '+z[1]]),['other','Άλλο…']])}</label>`:''}
+    <label>Μήκος φύλλου<input type="number" data-k="sheetL" value="${s.sheetL}"></label>
+    <label>Πλάτος φύλλου<input type="number" data-k="sheetW" value="${s.sheetW}"></label>
+    <label>Πάχος πόρτας${sel('doorThk',s.doorThk,thks.map(t=>[t,t+' mm']))}</label>
+   </div><p class="note" style="margin-top:8px"><span class="pill ${sup.ok?'yes':'no'}">${sup.ok?'Επιβεβαιωμένο':'Επιβεβαίωσε'}</span> ${esc(sup.note)}</p></div>
+
+  <div class="card"><h2>Πλάτη</h2><p class="note">Τρόπος και πάχος πλάτης ορίζονται σε κάθε κουτί. Εδώ: φύλλο για πλάτες HDF (3–5mm) και κανάλι.</p><div class="grid">
+    <label>Φύλλο HDF μήκος<input type="number" data-k="backSheetL" value="${s.backSheetL}"></label>
+    <label>Φύλλο HDF πλάτος<input type="number" data-k="backSheetW" value="${s.backSheetW}"></label>
+    <label>Βάθος καναλιού<input type="number" data-k="grooveDepth" value="${s.grooveDepth}"></label><label>Κανάλι από πίσω χείλος<input type="number" data-k="grooveFromBack" value="${s.grooveFromBack}"></label>
+   </div><p class="note" style="margin-top:8px">Βιδωτή: το βάθος D περιλαμβάνει την πλάτη, άρα όλα τα κομμάτια = D − πάχος πλάτης. Σε κανάλι: πλάτη = εσωτερικό + 2×(βάθος καναλιού − 1mm).</p></div>
+
+  <div class="card"><h2>PVC</h2><div class="grid">
+    <label>Λεπτό PVC${sel('pvcThin',s.pvcThin,[[0.4,'0,4 mm'],[0.45,'0,45 mm'],[0.8,'0,8 mm'],[1,'1 mm']])}</label>
+    <label>Χοντρό PVC${sel('pvcThick',s.pvcThick,[[1,'1 mm'],[1.3,'1,3 mm'],[2,'2 mm']])}</label>
+    <label>Περίσσευμα ανά πλευρά (mm)<input type="number" data-k="pvcExtra" value="${s.pvcExtra}"></label>
+    <label class="chk" style="margin-top:16px"><input type="checkbox" data-k="pvcComp" ${s.pvcComp?'checked':''}> Αφαίρεση πάχους PVC από την κοπή</label>
+   </div><p class="note" style="margin-top:8px">Πλάτος ταινίας: πλάκα 16–19mm → <b>22–23mm</b> · 25mm → <b>28–29mm</b> · 38mm → <b>43–45mm</b>.</p></div>
+
+  <div class="card"><h2>Πόρτες & μεντεσέδες</h2><div class="grid">
+    <label>Αέρας ανάμεσα σε πόρτες (mm)<input type="number" data-k="gap" value="${s.gap}"></label>
+    <label>Κέντρο τρύπας από χείλος${sel('cupC',s.cupC,[[20.5,'20,5 (απόσταση 3)'],[21.5,'21,5 (απόσταση 4)'],[22.5,'22,5 (απόσταση 5)'],[23.5,'23,5 (απόσταση 6)'],[24.5,'24,5 (απόσταση 7)']])}</label>
+    <label>Μεντεσές από πάνω/κάτω άκρη (mm)<input type="number" data-k="hingeEdge" value="${s.hingeEdge}"></label>
+   </div></div>
+
+  <div class="card"><h2>Συρτάρια</h2><div class="grid">
+    <label>Πάχος κουτιού συρταριού${sel('drThk',s.drThk,ALL_THK.map(t=>[t,t+' mm']))}</label>
+    <label>Πάχος πάτου${sel('drBotThk',s.drBotThk,[[3,'3 mm'],[4,'4 mm'],[5,'5 mm'],[8,'8 mm'],[10,'10 mm'],[16,'16 mm']])}</label>
+    <label>Κενό οδηγών (σύνολο δεξιά+αριστερά, mm)<input type="number" step="0.5" data-k="drClear" value="${s.drClear}"></label>
+    <label>Στήσιμο${sel('drBuild',s.drBuild,[['fbBetween','Μπρος & πίσω ανάμεσα στα πλαϊνά'],['sidesBetween','Πλαϊνά ανάμεσα σε μπρος & πίσω']])}</label>
+    <label>Ελάχιστο κενό πάνω από κάθε συρτάρι (mm)<input type="number" data-k="drMinGap" value="${s.drMinGap}"></label>
+   </div><p class="note" style="margin-top:8px">Φάρδος συρταριού = εσωτερικό κουτιού − κενό οδηγών. Ο πάτος βιδώνεται από κάτω, ίδιο μέγεθος με το συρτάρι.</p></div>
+
+  <div class="card"><h2>Ράφια & κοπή</h2><div class="grid">
+    <label>Ράφι πιο μέσα από μπροστά (mm)<input type="number" data-k="shelfSetback" value="${s.shelfSetback}"></label>
+    <label>Τζόγος ραφιού στο πλάτος (mm)<input type="number" data-k="shelfPlay" value="${s.shelfPlay}"></label>
+    <label>Πάχος πριονιού (mm)<input type="number" data-k="kerf" value="${s.kerf}"></label>
+    <label>Ξάκρισμα φύλλου ανά πλευρά (mm)<input type="number" data-k="trim" value="${s.trim}"></label>
+    <label class="chk" style="margin-top:16px"><input type="checkbox" data-k="grain" ${s.grain?'checked':''}> Κλείδωμα νερών (σχέδια ξύλου)</label>
+    <label class="chk" style="margin-top:16px"><input type="checkbox" data-k="longFirst" ${s.longFirst?'checked':''}> Μεγάλη διάσταση πάντα πρώτη (νερά κατά μήκος)</label>
+   </div></div>
+   <div class="row"><button class="btn del" id="resetAll">Επαναφορά ρυθμίσεων</button></div>`;
+  $('#t-settings').innerHTML=h;
+  $('#resetAll').onclick=()=>{ state.settings={...DEFAULT_SETTINGS}; save(); renderSettings(); toast('Επαναφέρθηκαν'); };
+}
+$('#t-settings').addEventListener('change',e=>{
+  const t=e.target,k=t.dataset.k; if(!k) return; const s=state.settings;
+  if(k==='supplier'){ s.supplier=t.value; const sup=SUPPLIERS.find(x=>x.id===t.value); if(sup.sizes.length){ s.sheetL=sup.sizes[0][0]; s.sheetW=sup.sizes[0][1]; } if(sup.thks.length && !sup.thks.includes(+s.thk)) s.thk=18; }
+  else if(k==='sizePreset'){ if(t.value!=='other'){ const [a,b]=t.value.split('x'); s.sheetL=+a; s.sheetW=+b; } }
+  else if(t.type==='checkbox') s[k]=t.checked;
+  else if(k==='backMode'||k==='drBuild') s[k]=t.value;
+  else if(k==='unit'){ if(s.unit!==t.value){ const f=t.value==='mm'?10:0.1; const c=x=>(x===''||x==null)?x:r1(+x*f);
+      state.modules.forEach(m=>{ m.W=c(m.W); m.H=c(m.H); m.D=c(m.D); m.doorH=c(m.doorH); }); state.extras.forEach(x=>{ x.L=c(x.L); x.W=c(x.W); }); } s.unit=t.value; }
+  else s[k]=+t.value;
+  save(); renderSettings();
+});
+
+/* --- Πληροφορίες --- */
+function renderInfo(){
+  $('#t-info').innerHTML=`<div class="card"><h2>Διαστάσεις φύλλων ανά προμηθευτή</h2><table><tr><th>Προμηθευτής</th><th>Φύλλα</th><th>Πάχη</th></tr>
+   ${SUPPLIERS.filter(x=>x.id!=='custom').map(x=>`<tr><td><b>${x.name}</b><br><span class="pill ${x.ok?'yes':'no'}">${x.ok?'επιβεβαιωμένο':'επιβεβαίωσε'}</span></td><td class="num">${x.sizes.map(z=>z.join('×')).join('<br>')}</td><td>${[...new Set(x.thks)].sort((a,b)=>a-b).join(', ')}</td></tr>`).join('')}
+   </table><p class="note">Πλάτη HDF: 3mm σε φύλλο 2800×2070 (Kronospan).</p></div>
+  <div class="card"><h2>Κανόνες που χρησιμοποιεί η εφαρμογή</h2><ul class="note">
+   <li><b>Μεντεσέδες (Blum/Grass):</b> τρύπα Ø35, βάθος 13mm, απόσταση τρύπας από χείλος 3–7mm (κέντρο 20,5–24,5mm).</li>
+   <li><b>Πόσοι μεντεσέδες</b> (πόρτα έως 600mm πλάτος): έως 900mm ύψος → 2, έως 1600 → 3, έως 2000 → 4, έως 2500 → 5. Πάνω από 600mm πλάτος → +1.</li>
+   <li>Η απόσταση πρώτου–τελευταίου μεντεσέ πρέπει να είναι μεγαλύτερη από το πλάτος της πόρτας.</li>
+   <li><b>Σύστημα 32:</b> τρύπες Ø5 ανά 32mm, 37mm από το μπροστινό χείλος.</li>
+   <li><b>PVC:</b> στάνταρ πάχη 0,4 / 0,8 / 1 / 2mm. Ταινία 22–23mm για πλάκα 18mm, 43mm για 38mm.</li>
+   <li><b>Πόρτες:</b> ολική επικάλυψη = (W − n×αέρας)/n · μισή = (W − πάχος − n×αέρας)/n · χωνευτή = (W − 2×πάχος − (n+1)×αέρας)/n.</li>
+  </ul></div>
+  <div class="card"><h2>Πηγές</h2><ul class="note">
+   <li><a href="https://support.egger.com/hc/en-us/articles/13541779196945-What-are-the-dimensions-of-Texture-Meets-Colour-boards">Egger — διαστάσεις Eurodekor</a></li>
+   <li><a href="https://www.environdec.com/library/epd4769">Ακρίτας — EPD μελαμίνης</a></li>
+   <li><a href="https://alfawood.gr/en/product/μοριοσανίδα-με-μελαμίνη">Alfa Wood — μοριοσανίδα με μελαμίνη</a></li>
+   <li><a href="https://kronospan.com/en_GR/decors/view/kronodesign/lhdf/K164/">Kronospan — φύλλα & HDF</a></li>
+   <li><a href="https://ea.blum.com/en/number-of-hinges/">Blum — αριθμός μεντεσέδων</a></li>
+   <li><a href="https://mediacenter.grass.eu/Katalog/EN/644/">Grass — μεντεσέδες ανά ύψος</a></li>
+   <li><a href="https://en.wikipedia.org/wiki/32_mm_cabinetmaking_system">Σύστημα 32mm</a></li>
+  </ul></div>`;
+}
+
+/* ===== PDF (χωρίς εξωτερικές βιβλιοθήκες: σελίδες σε canvas → JPEG → PDF) ===== */
+function buildReportPages(){
+  const s=state.settings; const RR=computeAll(state);
+  const PW=1190, PH=1684, M=70, CW=PW-2*M; const pages=[]; let ctx, y;
+  const F='system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif';
+  function newPage(){ const c=document.createElement('canvas'); c.width=PW; c.height=PH; ctx=c.getContext('2d'); ctx.fillStyle='#fff'; ctx.fillRect(0,0,PW,PH); pages.push(c); y=M; }
+  function need(hh){ if(y+hh>PH-M-30) newPage(); }
+  function font(size,w){ ctx.font=`${w||400} ${size}px ${F}`; }
+  function text(t,x,yy,size,w,color,align){ font(size,w); ctx.fillStyle=color||'#1f2328'; ctx.textAlign=align||'left'; ctx.textBaseline='alphabetic'; ctx.fillText(String(t),x,yy); }
+  function fit(t,wd,size,w){ font(size,w); t=String(t); if(ctx.measureText(t).width<=wd) return t; while(t.length>1 && ctx.measureText(t+'…').width>wd) t=t.slice(0,-1); return t+'…'; }
+  function h2(t){ need(150); y+=24; text(t,M,y+30,30,700); y+=44; ctx.fillStyle='#b4531a'; ctx.fillRect(M,y,CW,3); y+=18; }
+  function line(t,size,w,color){ need(size*1.6); text(t,M,y+size,size,w,color); y+=size*1.55; }
+
+  newPage();
+  text('Μέτρα Μελαμίνης — Λίστα κοπής',M,y+38,40,750); y+=60;
+  const sup=(SUPPLIERS.find(x=>x.id===s.supplier)||{}).name||'';
+  text(`${new Date().toLocaleDateString('el-GR')} · ${sup} · φύλλο ${s.sheetL}×${s.sheetW} · PVC λεπτό ${s.pvcThin}mm / χοντρό ${s.pvcThick}mm · διαστάσεις σε mm`,M,y+22,19,400,'#6b7280'); y+=44;
+  if(RR.warns.length){ RR.warns.forEach(w=>line('⚠ '+w,19,500,'#a16207')); }
+
+  h2('Σύνολα');
+  Object.values(RR.groups).forEach(g=> line(`${g.name}:  ${fmt(g.area)} m²  ·  ${g.pack.sheets.length} φύλλ${g.pack.sheets.length===1?'ο':'α'} ${g.SL}×${g.SW}`,22,500));
+  Object.keys(RR.pvc).sort().forEach(t=> line(`PVC ${String(t).replace('.',',')}mm:  ${fmt(RR.pvc[t])} m  (με +${s.pvcExtra}mm ανά πλευρά)`,22,500));
+
+  const cols=[['Κουτί',220],['Κομμάτι',270],['Μήκος',115],['Πλάτος',115],['Τεμ.',70],['PVC',260]];
+  function tableHead(){ need(44); ctx.fillStyle='#f3efe8'; ctx.fillRect(M,y,CW,40); let x=M+10; cols.forEach(([n,w])=>{ text(n,x,y+27,18,700,'#6b7280'); x+=w; }); y+=40; }
+  Object.values(RR.groups).forEach(g=>{
+    h2(`${g.name}  (${g.parts.reduce((a,p)=>a+p.qty,0)} τεμ.)`);
+    tableHead();
+    g.parts.forEach((p,i)=>{
+      if(y+38>PH-M-30){ newPage(); tableHead(); }
+      if(i%2){ ctx.fillStyle='#fbfaf7'; ctx.fillRect(M,y,CW,38); }
+      const vals=[p.mod,p.name,fmt(p.cL),fmt(p.cW),p.qty, p.kind==='back'?'—':edgeTxt(p.edges,s)];
+      let x=M+10; vals.forEach((v,j)=>{ const w=cols[j][1]; text(fit(v,w-14,20,(j===2||j===3)?700:400),x,y+26,20,(j===2||j===3)?700:400); x+=w; });
+      ctx.fillStyle='#e3e1dc'; ctx.fillRect(M,y+37,CW,1); y+=38;
+    });
+  });
+  y+=6; line('Μήκος = κατά τα νερά. PVC: Μ = πλευρά μήκους, Π = πλευρά πλάτους.',17,400,'#6b7280');
+
+  if(RR.doors.length){
+    h2('Τρυπήματα μεντεσέδων');
+    line(`Τρύπα Ø35, βάθος 13mm, κέντρο ${fmt(s.cupC)}mm από το χείλος. Βάση στο πλαϊνό στα 37mm από μπροστά. Ύψη από κάτω.`,18,400,'#6b7280');
+    RR.doors.forEach(d=>{
+      const g={}; d.sides.forEach(sd=>g[sd]=(g[sd]||0)+1);
+      Object.keys(g).forEach(sd=>{
+        need(80);
+        line(`${d.mod}: ${g[sd]*d.qty} × πόρτα ${fmt(d.h)} × ${fmt(d.w)} — μεντεσέδες ${sd==='Α'?'αριστερά':'δεξιά'}`,21,700);
+        line(`   ${d.pos.length} μεντεσέδες στα: ${d.pos.map(fmt).join(' · ')} mm   |   στο πλαϊνό: ${d.sidePos.map(fmt).join(' · ')} mm`,19,400);
+      });
+    });
+  }
+
+  h2('Πλάκες (εκτίμηση)');
+  Object.values(RR.groups).forEach(g=>{
+    g.pack.sheets.forEach((sh,i)=>{
+      const SWD=CW*0.82, sc=SWD/g.SL, hh=g.SW*sc;
+      need(hh+50);
+      text(`${g.name} — φύλλο ${i+1}/${g.pack.sheets.length} — αξιοποίηση ${Math.round(sh.yield*100)}%`,M,y+22,19,600); y+=34;
+      ctx.fillStyle='#efe9df'; ctx.fillRect(M,y,SWD,hh);
+      const t=+s.trim;
+      sh.placed.forEach(p=>{
+        const x=M+(p.x+t)*sc, yy=y+(p.y+t)*sc, w=p.w*sc, h=p.h*sc;
+        ctx.fillStyle='#fff'; ctx.fillRect(x,yy,w,h); ctx.strokeStyle='#8a8378'; ctx.lineWidth=1.5; ctx.strokeRect(x,yy,w,h);
+        const fs=Math.min(18, h*0.3, w*0.12);
+        if(fs>=9){ text(fit(p.p.name,w-6,fs,500),x+w/2,yy+h/2,fs,500,'#1f2328','center'); text(`${fmt(p.p.L)}×${fmt(p.p.W)}`,x+w/2,yy+h/2+fs*1.15,fs*0.85,400,'#6b7280','center'); }
+      });
+      y+=hh+20;
+    });
+  });
+  pages.forEach((c,i)=>{ const cx=c.getContext('2d'); cx.font=`400 16px ${F}`; cx.fillStyle='#9a948a'; cx.textAlign='right'; cx.fillText(`Σελίδα ${i+1} / ${pages.length}`,PW-M,PH-36); });
+  return pages;
+}
+async function pagesToPdf(pages){
+  const enc=new TextEncoder(); const chunks=[]; let off=0; const offs=[];
+  const push=d=>{ const b=typeof d==='string'?enc.encode(d):d; chunks.push(b); off+=b.length; };
+  const obj=(n,parts)=>{ offs[n]=off; push(n+' 0 obj\n'); parts.forEach(push); push('\nendobj\n'); };
+  push('%PDF-1.4\n'); push(new Uint8Array([37,226,227,207,211,10]));
+  const n=pages.length, W=595.28, H=841.89;
+  obj(1,['<</Type/Catalog/Pages 2 0 R>>']);
+  obj(2,[`<</Type/Pages/Kids[${pages.map((_,i)=>(3+3*i)+' 0 R').join(' ')}]/Count ${n}>>`]);
+  for(let i=0;i<n;i++){
+    const c=pages[i];
+    const blob=await new Promise(r=>c.toBlob(r,'image/jpeg',0.9));
+    const img=new Uint8Array(await blob.arrayBuffer());
+    const pg=3+3*i, ct=4+3*i, im=5+3*i;
+    obj(pg,[`<</Type/Page/Parent 2 0 R/MediaBox[0 0 ${W} ${H}]/Resources<</XObject<</Im0 ${im} 0 R>>>>/Contents ${ct} 0 R>>`]);
+    const cs=`q ${W} 0 0 ${H} 0 0 cm /Im0 Do Q`;
+    obj(ct,[`<</Length ${cs.length}>>\nstream\n${cs}\nendstream`]);
+    obj(im,[`<</Type/XObject/Subtype/Image/Width ${c.width}/Height ${c.height}/ColorSpace/DeviceRGB/BitsPerComponent 8/Filter/DCTDecode/Length ${img.length}>>\nstream\n`, img, '\nendstream']);
+  }
+  const total=3+3*n; const xref=off;
+  let x=`xref\n0 ${total}\n0000000000 65535 f \n`;
+  for(let k=1;k<total;k++) x+=String(offs[k]).padStart(10,'0')+' 00000 n \n';
+  push(x); push(`trailer\n<</Size ${total}/Root 1 0 R>>\nstartxref\n${xref}\n%%EOF\n`);
+  return new Blob(chunks,{type:'application/pdf'});
+}
+let _dl;
+async function downloadsNS(){ if(_dl!==undefined) return _dl; try{ _dl = (window.claude && window.claude.use) ? await window.claude.use('downloads') : null; }catch(e){ _dl=null; } return _dl; }
+async function exportPdf(btn){
+  const old=btn.textContent; btn.disabled=true; btn.textContent='Φτιάχνω το PDF…';
+  try{
+    const blob=await pagesToPdf(buildReportPages());
+    const name='Λίστα κοπής '+new Date().toISOString().slice(0,10)+'.pdf';
+    const dl=await downloadsNS();
+    if(!dl){ // εκτός Claude: κανονικό κατέβασμα από τον browser
+      const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=name; document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(()=>URL.revokeObjectURL(url),60000); toast('Το PDF κατέβηκε'); return; }
+    await dl.save({filename:name, data:blob});
+    toast('Το PDF αποθηκεύτηκε');
+  }catch(e){
+    const c=e&&e.code;
+    if(c==='declined') toast('Ακυρώθηκε');
+    else if(c==='rate_limited') toast('Περίμενε λίγο και ξαναδοκίμασε');
+    else toast('Δεν έγινε η αποθήκευση PDF');
+  }finally{ btn.disabled=false; btn.textContent=old; }
+}
+
+function render(){
+  if(cur==='project') renderProject();
+  if(cur==='cut') renderCut();
+  if(cur==='drill') renderDrill();
+  if(cur==='sheets') renderSheets();
+  if(cur==='settings') renderSettings();
+  if(cur==='info') renderInfo();
+}
+render();
+</script>
+</body>
+</html>
